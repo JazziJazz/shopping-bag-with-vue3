@@ -1,34 +1,61 @@
 <template>
   <div class="basket">
-    <div class="items">
-      <div class="item">
-        <div class="remove">Remover Produto</div>
-        <div class="photo">
-          <img
-            src="https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_.jpg"
-            alt=""
-          />
+
+    <template v-if="productsInBag.length > 0">
+      <div class="items">
+        <div v-for="(product, index) in productsInBag" v-bind:key="index" class="item">
+          <div v-on:click="removeFromBag(product)" class="remove">Remover Produto</div>
+
+          <div class="photo">
+            <img v-bind:src="product.image"/>
+          </div>
+
+          <div class="description">{{ product.title }}</div>
+
+          <div class="price">
+            <span class="quantity-area">
+              <button v-on:click="product.quantity--;" v-bind:disabled="product.quantity <= 0">-</button>
+              <span class="quantity">{{ product.quantity }}</span>
+              <button v-on:click="product.quantity++;">+</button>
+            </span>
+            <span class="amount">R$ {{ product.price }}</span>
+          </div>
         </div>
-        <div class="description">Mens Casual Premium Slim Fit T-Shirts</div>
-        <div class="price">
-          <span class="quantity-area">
-            <button disabled="">-</button>
-            <span class="quantity">1</span>
-            <button>+</button>
-          </span>
-          <span class="amount">R$ 22.30</span>
-        </div>
+
+        <div class="grand-total">Total do pedido: R$ {{ getTotalPrice() }}</div>
       </div>
-      <div class="grand-total">Total do pedido: R$ 22.30</div>
-    </div>
+    </template>
+
+    <template v-else>
+      <h1>Você não tem produtos no seu carrinho.</h1>
+    </template>
+
   </div>
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "Basket",
 
-  methods: {},
+  computed: mapState(["productsInBag"]),
+
+  methods: {
+    removeFromBag: function(product) {
+      return this.$store.dispatch("removeFromBag", product);
+    },
+
+    getTotalPrice: function() {
+      let totalValue = 0;
+
+      this.productsInBag.forEach((element) => {
+        totalValue += element.price * element.quantity
+      });
+
+      return totalValue.toFixed(2);
+    }
+  },
 };
 </script>
 
